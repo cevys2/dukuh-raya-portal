@@ -31,6 +31,20 @@ export type PortalApp = {
   sort_order: number;
 };
 
+export type PortalUser = {
+  id: number;
+  username: string;
+  role: string;
+};
+
+export type AccessGrant = {
+  id: number;
+  username: string;
+  app_id: number;
+  app_name: string;
+  role: string;
+};
+
 export function getStoredAuth(): AuthUser | null {
   const raw = localStorage.getItem("portal_auth");
   const lastSeenRaw = localStorage.getItem("portal_auth_last_seen");
@@ -94,5 +108,50 @@ export const api = {
   },
   myApps(token: string) {
     return request<PortalApp[]>(PORTAL_API_BASE, "/apps/me", {}, token);
+  },
+  listAllApps(token: string) {
+    return request<PortalApp[]>(PORTAL_API_BASE, "/apps", {}, token);
+  },
+  createApp(
+    token: string,
+    body: { key: string; name: string; description: string; icon: string; base_url: string; sort_order: number },
+  ) {
+    return request<PortalApp>(PORTAL_API_BASE, "/apps", { method: "POST", body: JSON.stringify(body) }, token);
+  },
+  listUsers(token: string) {
+    return request<PortalUser[]>(PORTAL_API_BASE, "/users", {}, token);
+  },
+  createUser(token: string, body: { username: string; password: string; role: "user" | "admin" }) {
+    return request<PortalUser>(PORTAL_API_BASE, "/users", { method: "POST", body: JSON.stringify(body) }, token);
+  },
+  deleteUser(token: string, username: string) {
+    return request<{ ok: boolean }>(PORTAL_API_BASE, `/users/${encodeURIComponent(username)}`, { method: "DELETE" }, token);
+  },
+  changePassword(token: string, username: string, new_password: string) {
+    return request<{ ok: boolean }>(
+      PORTAL_API_BASE,
+      "/users/password",
+      { method: "POST", body: JSON.stringify({ username, new_password }) },
+      token,
+    );
+  },
+  listAccess(token: string) {
+    return request<AccessGrant[]>(PORTAL_API_BASE, "/apps/access", {}, token);
+  },
+  grantAccess(token: string, body: { username: string; app_id: number; role: string }) {
+    return request<{ ok: boolean }>(
+      PORTAL_API_BASE,
+      "/apps/access",
+      { method: "POST", body: JSON.stringify(body) },
+      token,
+    );
+  },
+  revokeAccess(token: string, body: { username: string; app_id: number }) {
+    return request<{ ok: boolean }>(
+      PORTAL_API_BASE,
+      "/apps/access",
+      { method: "DELETE", body: JSON.stringify(body) },
+      token,
+    );
   },
 };
