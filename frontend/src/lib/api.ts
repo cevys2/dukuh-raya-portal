@@ -1,11 +1,22 @@
-// Portal calls two different backends:
-//  - shipyard-pricing's existing /auth/login, to authenticate (shared accounts)
-//  - Portal's own backend, to fetch which app cards this user can see
-const SHIPYARD_LOGIN_URL =
-  import.meta.env.VITE_SHIPYARD_API_URL ?? "http://localhost:8000";
 const PORTAL_API_BASE = import.meta.env.VITE_PORTAL_API_URL ?? "/api";
 
-const SESSION_TIMEOUT_MS = 10 * 60 * 1000; // 10 menit, sama seperti shipyard-pricing
+// Origins allowed to receive a token via the post-login `redirect` bounce-back.
+// Prevents an attacker-crafted `?redirect=` from leaking a freshly issued
+// JWT to an arbitrary domain (open redirect).
+const ALLOWED_APP_ORIGINS = (import.meta.env.VITE_ALLOWED_APP_ORIGINS ?? "")
+  .split(",")
+  .map((o: string) => o.trim())
+  .filter(Boolean);
+
+export function isAllowedRedirect(url: string): boolean {
+  try {
+    return ALLOWED_APP_ORIGINS.includes(new URL(url).origin);
+  } catch {
+    return false;
+  }
+}
+
+const SESSION_TIMEOUT_MS = 10 * 60 * 1000; // 10 menit, sama seperti aplikasi lain
 
 export type AuthUser = { username: string; role: string; token: string };
 
@@ -76,7 +87,7 @@ async function request<T>(
 export const api = {
   login(username: string, password: string) {
     return request<{ access_token: string; username: string; role: string }>(
-      SHIPYARD_LOGIN_URL,
+      PORTAL_API_BASE,
       "/auth/login",
       { method: "POST", body: JSON.stringify({ username, password }) },
     );

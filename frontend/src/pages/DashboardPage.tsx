@@ -60,7 +60,11 @@ export default function DashboardPage({ auth, onLogout }: Props) {
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {apps.map((app) => (
-            <a key={app.id} href={app.base_url} className="app-card">
+            <a
+              key={app.id}
+              href={`${app.base_url}#token=${encodeURIComponent(auth.token)}`}
+              className="app-card"
+            >
               <span className="app-card-icon">
                 <AppIcon name={app.icon} />
               </span>

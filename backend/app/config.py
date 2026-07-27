@@ -9,11 +9,13 @@ class Settings(BaseSettings):
     # Portal database yet - see project notes).
     database_url: str = ""
 
-    # MUST be the exact same value as shipyard-pricing backend's JWT_SECRET.
-    # That's what makes "login once, access everything" work: shipyard-pricing
-    # issues the token, Portal just verifies it with the same secret.
+    # Portal is the sole issuer of login tokens now. Every other app
+    # (shipyard-pricing, upcoming apps) MUST use this exact same value
+    # to verify tokens signed here - that's what makes "login once,
+    # access everything" work.
     jwt_secret: str
     jwt_algorithm: str = "HS256"
+    access_token_expire_minutes: int = 60 * 8
 
     cors_origins: str = "http://localhost:5174,http://127.0.0.1:5174"
 

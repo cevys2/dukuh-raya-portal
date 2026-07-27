@@ -1,7 +1,15 @@
 import { useEffect, useState } from "react";
-import { getStoredAuth, setStoredAuth, touchSession, type AuthUser } from "./lib/api";
+import { getStoredAuth, isAllowedRedirect, setStoredAuth, touchSession, type AuthUser } from "./lib/api";
 import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
+
+// Other apps (shipyard-pricing, upcoming ones) bounce unauthenticated users
+// here with ?redirect=<their URL>. After login we send the token back to
+// that URL instead of showing the Portal dashboard.
+function getRedirectTarget(): string | null {
+  const target = new URLSearchParams(window.location.search).get("redirect");
+  return target && isAllowedRedirect(target) ? target : null;
+}
 
 export default function App() {
   const [auth, setAuth] = useState<AuthUser | null>(() => getStoredAuth());
@@ -23,6 +31,10 @@ export default function App() {
   function onLogin(user: AuthUser) {
     setStoredAuth(user);
     setAuth(user);
+    const target = getRedirectTarget();
+    if (target) {
+      window.location.href = `${target}#token=${encodeURIComponent(user.token)}`;
+    }
   }
 
   function onLogout() {
