@@ -18,9 +18,9 @@ def normalize_db_url(db_url: str) -> str:
 
 
 def get_engine() -> Engine:
-    db_url = os.environ.get("SUPABASE_URL") or settings.supabase_url
+    db_url = os.environ.get("DATABASE_URL") or settings.database_url
     if not db_url:
-        raise RuntimeError("SUPABASE_URL is not set")
+        raise RuntimeError("DATABASE_URL is not set")
     return create_engine(
         normalize_db_url(db_url),
         pool_size=5,
@@ -36,7 +36,7 @@ engine = get_engine()
 def ensure_portal_tables() -> None:
     """Create the apps + user_app_access tables if they don't exist yet.
 
-    NOTE: these currently live in shipyard-pricing's Supabase database
+    NOTE: these currently live in shipyard-pricing's Railway Postgres database
     (no dedicated Portal database yet). `users.username` is treated as
     the shared identity - both tables reference it directly rather than
     a numeric user_id, since that's exactly what's inside the JWT

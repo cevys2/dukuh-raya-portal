@@ -4,10 +4,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    # Same Supabase Postgres instance shipyard-pricing already uses.
+    # Same Railway Postgres instance shipyard-pricing already uses.
     # The apps / user_app_access tables live here for now (no dedicated
     # Portal database yet - see project notes).
-    supabase_url: str = ""
+    database_url: str = ""
 
     # MUST be the exact same value as shipyard-pricing backend's JWT_SECRET.
     # That's what makes "login once, access everything" work: shipyard-pricing
