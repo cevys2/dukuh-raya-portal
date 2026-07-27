@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+pg8000
+python-dotenv
+pydantic
+pydantic-settings
+python-jose[cryptography]
