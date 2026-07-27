@@ -25,3 +25,11 @@ class AccessGrant(BaseModel):
     username: str = Field(min_length=1, max_length=50)
     app_id: int
     role: str = Field(default="user", pattern="^(user|admin)$")
+
+
+class AccessOut(BaseModel):
+    id: int
+    username: str
+    app_id: int
+    app_name: str
+    role: str
