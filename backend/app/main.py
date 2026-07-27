@@ -4,12 +4,15 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.database import ensure_portal_tables
+from app.database import ensure_portal_tables, ensure_users_table
 from app.routers.apps import router as apps_router
+from app.routers.auth import router as auth_router
+from app.routers.auth import users_router
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    ensure_users_table()
     ensure_portal_tables()
     yield
 
@@ -28,6 +31,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth_router)
+app.include_router(users_router)
 app.include_router(apps_router)
 
 

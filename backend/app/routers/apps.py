@@ -5,7 +5,7 @@ from sqlalchemy import text
 
 from app.auth import get_current_user, require_admin
 from app.database import engine
-from app.schemas.apps import AccessGrant, AppCreate, AppOut
+from app.schemas.apps import AccessGrant, AccessOut, AppCreate, AppOut
 
 router = APIRouter(prefix="/apps", tags=["apps"])
 
@@ -90,6 +90,25 @@ def create_app(body: AppCreate, _: Annotated[dict, Depends(require_admin)]):
         id=row[0], key=row[1], name=row[2], description=row[3], icon=row[4],
         base_url=row[5], is_active=row[6], sort_order=row[7],
     )
+
+
+@router.get("/access", response_model=list[AccessOut])
+def list_access(_: Annotated[dict, Depends(require_admin)]):
+    with engine.connect() as conn:
+        rows = conn.execute(
+            text(
+                """
+                SELECT uaa.id, uaa.username, uaa.app_id, a.name, uaa.role
+                FROM user_app_access uaa
+                JOIN apps a ON a.id = uaa.app_id
+                ORDER BY uaa.username, a.name
+                """
+            )
+        ).fetchall()
+    return [
+        AccessOut(id=r[0], username=r[1], app_id=r[2], app_name=r[3], role=r[4])
+        for r in rows
+    ]
 
 
 @router.post("/access")
